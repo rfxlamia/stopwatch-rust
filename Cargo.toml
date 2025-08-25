@@ -1,0 +1,15 @@
+[package]
+name = "stopwatch-rust"
+version = "0.2.1"
+edition = "2021"
+description = "A minimal stopwatch CLI with hybrid REPL + batch and realtime watch"
+repository = "https://github.com/rfxlamia/stopwatch-rust"
+readme = "README.md"
+license = "MIT"
+keywords = ["cli", "stopwatch", "timer", "repl"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+
+[dev-dependencies]
