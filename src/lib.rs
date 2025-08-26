@@ -1,47 +1,56 @@
 use std::time::{Duration, Instant};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum StopwatchErrorKind {
+pub enum TimerErrorKind {
     AlreadyRunning,
     NotRunning,
     Invalid,
 }
 
 #[derive(Debug)]
-pub struct StopwatchError(pub StopwatchErrorKind);
+pub struct TimerError(pub TimerErrorKind);
 
-/// Simple stopwatch for measuring elapsed time.
-pub struct Stopwatch {
-    pub start_time: Option<Instant>,
-    pub elapsed: Duration,
-    pub running: bool,
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct Lap {
+    pub index: usize,
+    // store lap time as milliseconds since start for simple serialization
+    pub at_ms: u128,
+    pub label: Option<String>,
 }
 
-impl Default for Stopwatch {
+/// Core timer with laps support.
+pub struct Timer {
+    start_time: Option<Instant>,
+    elapsed: Duration,
+    running: bool,
+    laps: Vec<Lap>,
+}
+
+impl Default for Timer {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl Stopwatch {
+impl Timer {
     pub fn new() -> Self {
-        Self { start_time: None, elapsed: Duration::ZERO, running: false }
+        Self { start_time: None, elapsed: Duration::ZERO, running: false, laps: Vec::new() }
     }
 
-    /// Start the stopwatch if not already running.
-    pub fn start(&mut self) -> Result<(), StopwatchError> {
+    /// Start the timer if not already running.
+    pub fn start(&mut self) -> Result<(), TimerError> {
         if self.running {
-            return Err(StopwatchError(StopwatchErrorKind::AlreadyRunning));
+            return Err(TimerError(TimerErrorKind::AlreadyRunning));
         }
         self.start_time = Some(Instant::now());
         self.running = true;
         Ok(())
     }
 
-    /// Stop the stopwatch and accumulate elapsed time.
-    pub fn stop(&mut self) -> Result<(), StopwatchError> {
+    /// Stop the timer and accumulate elapsed time.
+    pub fn stop(&mut self) -> Result<(), TimerError> {
         if !self.running {
-            return Err(StopwatchError(StopwatchErrorKind::NotRunning));
+            return Err(TimerError(TimerErrorKind::NotRunning));
         }
         if let Some(start) = self.start_time.take() {
             self.elapsed += start.elapsed();
@@ -50,11 +59,12 @@ impl Stopwatch {
         Ok(())
     }
 
-    /// Reset the stopwatch to zero and stop it.
+    /// Reset the timer to zero, stop it, and clear laps.
     pub fn reset(&mut self) {
         self.start_time = None;
         self.elapsed = Duration::ZERO;
         self.running = false;
+        self.laps.clear();
     }
 
     /// Total elapsed time, including current running slice if any.
@@ -66,6 +76,19 @@ impl Stopwatch {
         }
         self.elapsed
     }
+
+    /// Record a lap at current elapsed time with optional label.
+    pub fn lap(&mut self, label: Option<String>) -> Result<(), TimerError> {
+        if !self.running {
+            return Err(TimerError(TimerErrorKind::NotRunning));
+        }
+        let idx = self.laps.len() + 1;
+        let at_ms = self.elapsed().as_millis();
+        self.laps.push(Lap { index: idx, at_ms, label });
+        Ok(())
+    }
+
+    pub fn laps(&self) -> &[Lap] { &self.laps }
 }
 
 /// Format a Duration as HH:MM:SS.mmm (integer milliseconds)

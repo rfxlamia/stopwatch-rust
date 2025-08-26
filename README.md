@@ -1,20 +1,21 @@
-# Stopwatch CLI (Rust)
+# Timer CLI (Rust)
 
-A minimal command-line stopwatch with hybrid modes and realtime watch.
+A reliable command-line timer with hybrid modes, realtime watch, laps, export, and measure.
 
 ## Features
 
 * Start, stop, reset, and show elapsed time
-* Chain multiple commands in a single run (batch)
-* Interactive REPL (default when no args)
+* Laps: record splits with optional labels; view deltas
+* Export laps to JSON or CSV (stdout; pipe-friendly)
+* Measure external commands and propagate exit code
+* Interactive REPL (default), batch via `run`, legacy batch compatible
 * Realtime `watch` mode (updates in-place; press Enter to exit)
-* Help (`-h`/`--help`) and version (`-V`/`--version`)
 
 ## Clone & Setup
 
 ```bash
-git clone https://github.com/rfxlamia/stopwatch-rust.git
-cd stopwatch-rust
+git clone https://github.com/rfxlamia/timer-cli.git
+cd timer-cli
 cargo build
 cargo run
 ```
@@ -35,27 +36,31 @@ Run without arguments:
 cargo run
 ```
 
-REPL commands: `start | stop | reset | elapsed | watch | help | exit`
+REPL commands: `start | stop | reset | elapsed | watch | lap [label] | laps | export [json|csv] | measure -- <cmd...> | help | exit`
 
 ### Batch mode (once per run)
 
 ```bash
-cargo run -- run start elapsed stop elapsed
+cargo run -- run start lap setup lap coding stop elapsed laps export json
 ```
 
 ### Legacy batch mode (compatibility)
 
 ```bash
-cargo run -- start elapsed stop elapsed
+cargo run -- start lap build stop laps export csv
 ```
 
 ## Commands
 
-* `start`: Start the stopwatch
-* `stop`: Stop the stopwatch and accumulate elapsed time
-* `reset`: Reset elapsed time to zero and stop
+* `start`: Start the timer
+* `stop`: Stop the timer and accumulate elapsed time
+* `reset`: Reset elapsed time to zero, stop, and clear laps
 * `elapsed`: Print the current elapsed time
 * `watch`: Show realtime elapsed time; press Enter to exit (screen shows: "Press Enter to switch command")
+* `lap [label]`: Record a lap at current elapsed time
+* `laps`: Show lap table with deltas
+* `export [json|csv]`: Print laps to stdout (pipe to files)
+* `measure -- <cmd...>`: Run an external command and report duration; propagates exit code
 * `-h`, `--help`: Show help
 * `-V`, `--version`: Show version
 

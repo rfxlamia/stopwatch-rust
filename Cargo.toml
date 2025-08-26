@@ -1,15 +1,18 @@
 [package]
-name = "stopwatch-rust"
-version = "0.2.1"
+name = "timer-cli"
+version = "0.3.0"
 edition = "2021"
-description = "A minimal stopwatch CLI with hybrid REPL + batch and realtime watch"
-repository = "https://github.com/rfxlamia/stopwatch-rust"
+description = "A reliable timing CLI: REPL + batch, realtime watch, lap/export, measure external commands"
+repository = "https://github.com/rfxlamia/timer-cli"
 readme = "README.md"
 license = "MIT"
-keywords = ["cli", "stopwatch", "timer", "repl"]
+keywords = ["cli", "timer", "stopwatch", "repl", "benchmark"]
 categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+csv = "1"
 
 [dev-dependencies]
